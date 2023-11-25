@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Playlist</string>
+    <string name="product_image">Product Image</string>
+    <string name="order_placed">Order Placed</string>
+    <string name="continue_shopping">Continue Shopping</string>
+
 </resources>

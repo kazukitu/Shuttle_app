@@ -33,7 +33,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ConfirmationActivity">
 
+        </activity>
+        <activity android:name=".DetailActivity">
+
+        </activity>
+        <activity android:name=".ShoppingCartActivity"></activity>
         <activity
             android:name=".RegisterActivity"
             android:exported="true">
