@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class ShoppingCartActivity extends AppCompatActivity {
 
-    // Views for the shopping cart items, subtotal, fees, and total
     private TextView productNameTextView;
     private TextView productPriceTextView;
     private TextView feeTextView;
@@ -24,7 +23,6 @@ public class ShoppingCartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_cart);
 
-        // Initialize your views here
         productNameTextView = findViewById(R.id.text_view_cart_title);
         productPriceTextView = findViewById(R.id.text_view_subtotal);
         feeTextView = findViewById(R.id.text_view_fees);

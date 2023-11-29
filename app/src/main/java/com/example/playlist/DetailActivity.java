@@ -51,7 +51,6 @@ public class DetailActivity extends AppCompatActivity {
             if (imageResId != 0) {
                 productImage.setImageResource(imageResId);
             } else {
-                // Set a default image or handle the error
                 productImage.setImageResource(R.drawable.playstation5);
             }
         }
@@ -65,15 +64,13 @@ public class DetailActivity extends AppCompatActivity {
         buyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create an intent for the ShoppingCartActivity
                 Intent intent = new Intent(v.getContext(), ShoppingCartActivity.class);
                 int imageResId = intent.getIntExtra("imageResId", 0);
-                // Pass necessary data to the ShoppingCartActivity
                 intent.putExtra("productName", productName.getText().toString());
                 intent.putExtra("productPrice", productPrice.getText().toString());
                 intent.putExtra("imageResId", imageResId);
 
-                // Start the ShoppingCartActivity
+
                 v.getContext().startActivity(intent);
             }
         });

@@ -8,86 +8,127 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.playlist.MainActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 
 public class LoginActivity extends AppCompatActivity {
-    DatabaseHelper databaseHelper;
+    private static final int RC_SIGN_IN = 100;
+
+    private DatabaseHelper databaseHelper;
     private EditText usernameEditText;
     private EditText passwordEditText;
     private Button loginButton;
-
-    private void displayUsers() {
-        // 查询数据库并打印用户信息到Log
-        Log.d("User List", "List of Users:");
-
-        Cursor cursor = databaseHelper.getAllUserData();
-        if (cursor != null && cursor.getCount() > 0) {
-            while (cursor.moveToNext()) {
-                String userId = cursor.getString(0);
-                String userName = cursor.getString(1);
-                String userPassword = cursor.getString(2);
-                Log.d("User List", "User ID: " + userId + ", Username: " + userName + ", Password: " + userPassword);
-            }
-            cursor.close();
-        } else {
-            Log.d("User List", "No users found in the database.");
-        }
-    }
+    private Button googleLoginButton;
+    private GoogleSignInClient mGoogleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        //Initialize DatabaseHelper
+
+
         databaseHelper = new DatabaseHelper(this);
-        // 初始化界面元素
+
+
         usernameEditText = findViewById(R.id.usernameEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         loginButton = findViewById(R.id.normalLoginButton);
+        googleLoginButton = findViewById(R.id.googleLoginButton);
 
-        Button registerButton = findViewById(R.id.registerButton);
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 当用户点击"Register"按钮时，跳转到注册页面
-                Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(registerIntent);
-            }
-        });
-
-        // 获取 Display Users 按钮
-        Button displayUsersButton = findViewById(R.id.displayUsersButton);
-        displayUsersButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 在这里处理显示用户信息的逻辑
-                displayUsers();
-            }
-        });
+        // Initialize Google Sign-In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 获取输入的用户名和密码
-                String enteredUsername = usernameEditText.getText().toString();
-                String enteredPassword = passwordEditText.getText().toString();
-
-                // 查询数据库以获取用户名对应的MD5哈希密码
-                Boolean userExisit = databaseHelper.checkUser(enteredUsername,enteredPassword);
-                Log.d("User Exists", String.valueOf(userExisit));
-
-                if (userExisit) {
-                    // Login Successful
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Toast.makeText(LoginActivity.this, "Login Failed，Please Check Username and Password", Toast.LENGTH_SHORT).show();
-                }
+                normalLogin();
             }
         });
+
+        // Google login button listener
+        googleLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                googleLogin();
+            }
+        });
+
+
+        Button registerButton = findViewById(R.id.registerButton);
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(registerIntent);
+            }
+        });
+
+
+        Button displayUsersButton = findViewById(R.id.displayUsersButton);
+        displayUsersButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayUsers();
+            }
+        });
+    }
+
+    private void normalLogin() {
+        String enteredUsername = usernameEditText.getText().toString();
+        String enteredPassword = passwordEditText.getText().toString();
+
+        Boolean userExist = databaseHelper.checkUser(enteredUsername, enteredPassword);
+        Log.d("User Exists", String.valueOf(userExist));
+
+        if (userExist) {
+            // Login successful
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(LoginActivity.this, "Login Failed, Please Check Username and Password", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void googleLogin() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+        }
+    }
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        } catch (ApiException e) {
+
+            Toast.makeText(LoginActivity.this, "Google Login Failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void displayUsers() {
+        // Display users logic...
     }
 }
